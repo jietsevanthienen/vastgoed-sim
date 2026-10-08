@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiscale Simulator: Gesplitste Aankoop vs. 100% Aankoop & Schenking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .badge-pulse {
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .7; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
+    <header class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white shadow-xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-200 border border-blue-400/30 mb-2">
+                        <i class="fa-solid fa-scale-balanced"></i> Vlaamse Fiscale Wetgeving & VLABEL
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Vastgoed Successie Simulator</h1>
+                    <p class="text-slate-300 text-sm sm:text-base mt-1 max-w-2xl">
+                        Vergelijk de kosten van een <span class="text-blue-300 font-semibold">Gesplitste Aankoop</span> tegenover een <span class="text-emerald-300 font-semibold">100% Aankoop met 6% BTW + Schenking na 5 jaar</span>.
+                    </p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <div class="text-xs text-slate-300">Geoptimaliseerd voor</div>
+                        <div class="text-sm font-semibold text-white">Nieuwbouw / Heropbouw 6%</div>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
+                        <i class="fa-solid fa-house-chimney-medical text-lg text-blue-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Linker Paneel: Parameters / Invoer -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-blue-600"></i> Parameters
+                        </h2>
+                        <button id="resetBtn" class="text-xs text-blue-600 hover:text-blue-800 font-medium transition">
+                            Standaardwaarden
+                        </button>
+                    </div>
+
+                    <!-- Leeftijd Ouder 1 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-sm font-medium">
+                            <label for="age1" class="text-slate-700 flex items-center gap-1.5">
+                                <i class="fa-solid fa-user text-slate-400"></i> Leeftijd Ouder 1
+                            </label>
+                            <span id="age1Val" class="px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-700 font-bold border border-blue-200 text-sm">65 jaar</span>
+                        </div>
+                        <input type="range" id="age1" min="40" max="90" value="65" class="w-full h-2 bg-slate-200 rounded-lg appearance-none">
+                        <div class="flex justify-between text-[11px] text-slate-400 px-0.5">
+                            <span>40j</span>
+                            <span>65j</span>
+                            <span>90j</span>
+                        </div>
+                    </div>
+
+                    <!-- Leeftijd Ouder 2 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-sm font-medium">
+                            <label for="age2" class="text-slate-700 flex items-center gap-1.5">
+                                <i class="fa-solid fa-user text-slate-400"></i> Leeftijd Ouder 2
+                            </label>
+                            <span id="age2Val" class="px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-700 font-bold border border-blue-200 text-sm">63 jaar</span>
+                        </div>
+                        <input type="range" id="age2" min="40" max="90" value="63" class="w-full h-2 bg-slate-200 rounded-lg appearance-none">
+                        <div class="flex justify-between text-[11px] text-slate-400 px-0.5">
+                            <span>40j</span>
+                            <span>65j</span>
+                            <span>90j</span>
+                        </div>
+                    </div>
+
+                    <!-- Totale Basisprijs Vastgoed (excl. btw & reg) -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-sm font-medium">
+                            <label for="totalPrice" class="text-slate-700 flex items-center gap-1.5">
+                                <i class="fa-solid fa-tag text-slate-400"></i> Basisprijs (excl. belasting)
+                            </label>
+                            <span id="totalPriceVal" class="font-bold text-slate-900">€ 500.000</span>
+                        </div>
+                        <input type="range" id="totalPrice" min="200000" max="1500000" step="10000" value="500000" class="w-full h-2 bg-slate-200 rounded-lg appearance-none">
+                        <p class="text-[11px] text-slate-400 leading-tight">Verkoopprijs zonder btw en zonder registratierechten.</p>
+                    </div>
+
+                    <!-- Grondaandeel percentage -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-sm font-medium">
+                            <label for="landPct" class="text-slate-700 flex items-center gap-1.5">
+                                <i class="fa-solid fa-layer-group text-slate-400"></i> Grondaandeel
+                            </label>
+                            <span id="landPctVal" class="font-bold text-slate-900">20% (€ 100.000)</span>
+                        </div>
+                        <input type="range" id="landPct" min="10" max="40" step="1" value="20" class="w-full h-2 bg-slate-200 rounded-lg appearance-none">
+                        <div class="flex justify-between text-[11px] text-slate-400">
+                            <span>Grond: 12% Reg.</span>
+                            <span>Constructie: BTW</span>
+                        </div>
+                    </div>
+
+                    <!-- Aantal Kinderen -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-sm font-medium">
+                            <label for="numKids" class="text-slate-700 flex items-center gap-1.5">
+                                <i class="fa-solid fa-people-roof text-slate-400"></i> Aantal Begunstigde Kinderen
+                            </label>
+                            <span id="numKidsVal" class="px-2.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 font-bold border border-indigo-200 text-sm">2 kinderen</span>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button type="button" data-kids="1" class="kids-btn py-2 text-sm font-semibold rounded-lg border border-slate-200 hover:bg-slate-50 transition">1</button>
+                            <button type="button" data-kids="2" class="kids-btn py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white border border-blue-600 transition">2</button>
+                            <button type="button" data-kids="3" class="kids-btn py-2 text-sm font-semibold rounded-lg border border-slate-200 hover:bg-slate-50 transition">3</button>
+                            <button type="button" data-kids="4" class="kids-btn py-2 text-sm font-semibold rounded-lg border border-slate-200 hover:bg-slate-50 transition">4</button>
+                        </div>
+                    </div>
+
+                    <!-- Jaarlijkse meerwaarde vastgoed na 5 jaar -->
+                    <div class="space-y-2 pt-2 border-t border-slate-100">
+                        <div class="flex justify-between items-center text-sm font-medium">
+                            <label for="growthRate" class="text-slate-700 flex items-center gap-1.5">
+                                <i class="fa-solid fa-arrow-trend-up text-slate-400"></i> Waardegroei woning na 5j
+                            </label>
+                            <span id="growthRateVal" class="font-bold text-slate-900">+0%</span>
+                        </div>
+                        <input type="range" id="growthRate" min="0" max="25" step="1" value="0" class="w-full h-2 bg-slate-200 rounded-lg appearance-none">
+                        <p class="text-[11px] text-slate-400">Totale waardestijging van het pand gedurende de 5 jaar verplichte bewoning.</p>
+                    </div>
+
+                    <!-- Co-investering Kinderen (Model 1) -->
+                    <div class="pt-4 border-t border-slate-200 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fa-solid fa-hand-holding-dollar text-emerald-600"></i> Co-investering Kinderen
+                            </span>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-semibold">Model 1</span>
+                        </div>
+
+                        <!-- Snelle Presets -->
+                        <div class="grid grid-cols-3 gap-1.5 text-[11px]">
+                            <button type="button" id="presetModel1" class="py-1.5 px-2 bg-emerald-50 text-emerald-700 font-semibold rounded-lg border border-emerald-300 hover:bg-emerald-100 transition text-center">
+                                Kind A 33% (1/3)
+                            </button>
+                            <button type="button" id="presetEqualKids" class="py-1.5 px-2 bg-slate-100 text-slate-700 font-medium rounded-lg border border-slate-200 hover:bg-slate-200 transition text-center">
+                                Beide 25%
+                            </button>
+                            <button type="button" id="presetZeroKids" class="py-1.5 px-2 bg-slate-100 text-slate-700 font-medium rounded-lg border border-slate-200 hover:bg-slate-200 transition text-center">
+                                0% (Alleen Ouders)
+                            </button>
+                        </div>
+
+                        <!-- Eigen Inbreng Kind A -->
+                        <div class="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <div class="flex justify-between items-center text-xs font-semibold">
+                                <span class="text-slate-700 flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Inbreng Kind A:
+                                </span>
+                                <span id="shareChildAVal" class="text-emerald-700 font-bold">33,3% (€ 178.667)</span>
+                            </div>
+                            <input type="range" id="shareChildA" min="0" max="60" step="1" value="33" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none accent-emerald-600">
+                            <div class="flex justify-between text-[10px] text-slate-400">
+                                <span>€ 0</span>
+                                <span>Max 60%</span>
+                            </div>
+                        </div>
+
+                        <!-- Eigen Inbreng Kind B -->
+                        <div class="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <div class="flex justify-between items-center text-xs font-semibold">
+                                <span class="text-slate-700 flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full bg-blue-500"></span> Inbreng Kind B:
+                                </span>
+                                <span id="shareChildBVal" class="text-blue-700 font-bold">0% (€ 0)</span>
+                            </div>
+                            <input type="range" id="shareChildB" min="0" max="60" step="1" value="0" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none accent-blue-600">
+                            <div class="flex justify-between text-[10px] text-slate-400">
+                                <span>€ 0</span>
+                                <span>Max 60%</span>
+                            </div>
+                        </div>
+
+                        <!-- Inbreng Ouders (Resterend Kapitaal) -->
+                        <div class="p-2.5 bg-blue-50/80 rounded-xl border border-blue-200/80 flex items-center justify-between text-xs">
+                            <span class="text-slate-700 font-medium flex items-center gap-1.5">
+                                <i class="fa-solid fa-users text-blue-600"></i> Resterend aandeel ouders:
+                            </span>
+                            <span id="shareParentsVal" class="font-bold text-blue-900">66,7% (€ 357.333)</span>
+                        </div>
+                    </div>
+
+                    <!-- Type geldschenking Optie A -->
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                        <label class="text-xs font-semibold text-slate-700 block">Schenkbelasting bankgift (Optie A):</label>
+                        <div class="flex gap-4">
+                            <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+                                <input type="radio" name="bankGiftTax" value="3" checked class="text-blue-600 focus:ring-blue-500">
+                                Geregistreerd (3%)
+                            </label>
+                            <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+                                <input type="radio" name="bankGiftTax" value="0" class="text-blue-600 focus:ring-blue-500">
+                                Niet geregistreerd (0%*)
+                            </label>
+                        </div>
+                        <p class="text-[10px] text-slate-500">*0% vereist 5 jaar overleven van de ouders (in Vlaanderen).</p>
+                    </div>
+                </div>
+
+                <!-- VLABEL Tabel Referentiebox -->
+                <div class="bg-blue-50/70 border border-blue-200 rounded-2xl p-5 text-xs text-blue-900 space-y-2">
+                    <div class="font-bold text-sm flex items-center gap-1.5 text-blue-950">
+                        <i class="fa-solid fa-circle-info text-blue-600"></i> VLABEL Waarderingsregels
+                    </div>
+                    <p class="leading-relaxed">
+                        Bij twee ouders met een verschillende leeftijd wordt voor het gecombineerde vruchtgebruik de officiële leeftijdstrap van <strong>de langstlevende (jongste) ouder</strong> toegepast voor de fiscale bepaling.
+                    </p>
+                    <div id="vlabelSummary" class="bg-white rounded-lg p-2.5 border border-blue-200/80 font-mono text-[11px] space-y-1">
+                        <!-- Dynamisch gevuld -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rechter Paneel: Vergelijking & Gedetailleerde Resultaten -->
+            <div class="lg:col-span-8 space-y-6">
+
+                <!-- Grote Samenvattingskaart: Het Verschil -->
+                <div id="winnerCard" class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-2xl shadow-lg p-6 relative overflow-hidden">
+                    <div class="absolute -right-10 -bottom-10 opacity-10 text-9xl">
+                        <i class="fa-solid fa-piggy-bank"></i>
+                    </div>
+                    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <div class="text-xs uppercase tracking-wider font-bold text-emerald-200 mb-1">
+                                <i class="fa-solid fa-crown mr-1"></i> Voordeligste Traject
+                            </div>
+                            <h3 class="text-2xl font-black tracking-tight" id="winnerTitle">Optie B bespaart € 37.737</h3>
+                            <p class="text-emerald-100 text-sm mt-1 max-w-lg" id="winnerDesc">
+                                Dankzij het 6% btw-tarief op de volledige constructie bespaart u meer op btw dan de eventuele schenkbelasting na 5 jaar kost.
+                            </p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-5 py-3 text-center md:text-right shrink-0">
+                            <div class="text-xs text-emerald-200 font-medium">Netto Verschil</div>
+                            <div class="text-3xl font-extrabold" id="savingsAmount">€ 37.737</div>
+                            <div class="text-[11px] text-emerald-100 font-medium mt-0.5">ten gunste van Optie B</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2 Kolommen: Optie A vs Optie B Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- Optie A Kaart -->
+                    <div class="bg-white rounded-2xl shadow-sm border-2 border-slate-200 hover:border-blue-300 transition p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+                                    Optie A
+                                </span>
+                                <span class="text-xs text-slate-500 font-medium">Jaar 0 (Direct)</span>
+                            </div>
+                            <h4 class="text-lg font-bold text-slate-800 mb-1">Gesplitste Aankoop</h4>
+                            <p class="text-xs text-slate-500 mb-6">Ouders kopen vruchtgebruik, kinderen kopen blote eigendom met geschonken geld.</p>
+
+                            <!-- Kostenlijst A -->
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                    <span class="text-slate-600">Registratierechten grond (12%)</span>
+                                    <span class="font-semibold text-slate-800" id="optA_reg">€ 12.000</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                    <div class="flex flex-col">
+                                        <span class="text-slate-600">BTW Constructie</span>
+                                        <span class="text-[10px] text-amber-600 font-medium" id="optA_vatBreakdown">6% op VG / 21% op BE</span>
+                                    </div>
+                                    <span class="font-bold text-amber-600" id="optA_vat">€ 64.800</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                    <div class="flex flex-col">
+                                        <span class="text-slate-600">Schenkbelasting bankgift</span>
+                                        <span class="text-[10px] text-slate-400" id="optA_giftTaxRate">3% registratie</span>
+                                    </div>
+                                    <span class="font-semibold text-slate-800" id="optA_giftTax">€ 12.158</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                    <span class="text-slate-600">Notariskosten (1 aankoopakte)</span>
+                                    <span class="font-semibold text-slate-800" id="optA_notary">€ 6.000</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 mt-6 border-t border-slate-200">
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-sm font-semibold text-slate-600">Totale Extra Kosten</span>
+                                <span class="text-2xl font-black text-slate-900" id="optA_total">€ 94.958</span>
+                            </div>
+                            <div class="text-[11px] text-slate-400 mt-1">Direct betaalbaar bij aankoop</div>
+                        </div>
+                    </div>
+
+                    <!-- Optie B Kaart -->
+                    <div class="bg-white rounded-2xl shadow-sm border-2 border-emerald-500/50 hover:border-emerald-500 transition p-6 flex flex-col justify-between relative bg-emerald-50/10">
+                        <div class="absolute -top-3 right-4">
+                            <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-600 text-white shadow-sm flex items-center gap-1">
+                                <i class="fa-solid fa-star text-[10px]"></i> Meest fiscaal voordelig
+                            </span>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                                    Optie B
+                                </span>
+                                <span class="text-xs text-slate-500 font-medium">Aankoop nu + Schenking over 5j</span>
+                            </div>
+                            <h4 class="text-lg font-bold text-slate-800 mb-1">100% Ouders + Schenking</h4>
+                            <p class="text-xs text-slate-500 mb-6">Ouders kopen 100% aan 6% BTW, wonen er 5 jaar, en schenken dan blote eigendom.</p>
+
+                            <!-- Kostenlijst B -->
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                    <span class="text-slate-600">Registratierechten grond (12%)</span>
+                                    <span class="font-semibold text-slate-800" id="optB_reg">€ 12.000</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                    <div class="flex flex-col">
+                                        <span class="text-slate-600">BTW Constructie</span>
+                                        <span class="text-[10px] text-emerald-600 font-medium">100% aan 6% BTW (enige woning)</span>
+                                    </div>
+                                    <span class="font-bold text-emerald-600" id="optB_vat">€ 24.000</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                    <div class="flex flex-col">
+                                        <span class="text-slate-600">Schenkbelasting vastgoed (Jaar 5)</span>
+                                        <span class="text-[10px] text-slate-400" id="optB_giftBreakdown">Leeftijd +5j / over 4 delen</span>
+                                    </div>
+                                    <span class="font-semibold text-slate-800" id="optB_giftTax">€ 12.221</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                                    <div class="flex flex-col">
+                                        <span class="text-slate-600">Notariskosten (2 akten)</span>
+                                        <span class="text-[10px] text-slate-400">Aankoopakte + Schenkingsakte</span>
+                                    </div>
+                                    <span class="font-semibold text-slate-800" id="optB_notary">€ 9.000</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 mt-6 border-t border-slate-200">
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-sm font-semibold text-slate-600">Totale Extra Kosten</span>
+                                <span class="text-2xl font-black text-emerald-600" id="optB_total">€ 57.221</span>
+                            </div>
+                            <div class="text-[11px] text-slate-400 mt-1">Spreiding over 5 jaar</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Model 1 Detail: Eigendomsverdeling & Rendement na 5 Jaar -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
+                        <div>
+                            <span class="text-xs uppercase tracking-wider font-bold text-emerald-700 flex items-center gap-1.5">
+                                <i class="fa-solid fa-file-contract text-emerald-600"></i> Model 1: Notariële Verrekening & Eigendom na 5 Jaar
+                            </span>
+                            <h4 class="text-base font-bold text-slate-800 mt-0.5">Eindverdeling Blote Eigendom & Rendement Kind A</h4>
+                        </div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800">
+                            <i class="fa-solid fa-shield-halved text-emerald-600"></i> Waardekoppeling Actief
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Kind A Dashboard Kaart -->
+                        <div class="bg-gradient-to-br from-slate-50 to-emerald-50/40 p-4 rounded-xl border border-emerald-200/80 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-emerald-500"></span> Kind A (Mee-investeerder)
+                                </span>
+                                <span id="childA_ownershipPct" class="px-2 py-0.5 bg-emerald-600 text-white rounded text-xs font-black">66,7% BE</span>
+                            </div>
+                            
+                            <div class="space-y-1.5 text-xs">
+                                <div class="flex justify-between py-1 border-b border-slate-200/60">
+                                    <span class="text-slate-600">Oorspronkelijke Inleg (Lening Jaar 0):</span>
+                                    <span class="font-semibold text-slate-800" id="childA_loanInitial">€ 178.667</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-slate-200/60">
+                                    <span class="text-slate-600">Geherwaardeerde Waarde na 5j:</span>
+                                    <span class="font-bold text-emerald-700" id="childA_loanIndexed">€ 193.333</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-slate-200/60">
+                                    <span class="text-slate-600">Gerealiseerd Meerwaarderendement:</span>
+                                    <span class="font-bold text-emerald-600" id="childA_profit">+€ 14.666 (+8,2%)</span>
+                                </div>
+                                <div class="flex justify-between py-1">
+                                    <span class="text-slate-600">Ouderlijke Schenking (1/2 van saldo):</span>
+                                    <span class="font-semibold text-slate-800" id="childA_giftShare">€ 146.933</span>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-2 border-t border-emerald-200/80 flex justify-between items-baseline text-xs">
+                                <span class="font-bold text-slate-700">Totale Waarde Blote Eigendom:</span>
+                                <span class="text-sm font-black text-emerald-800" id="childA_totalValue">€ 293.867</span>
+                            </div>
+                        </div>
+
+                        <!-- Kind B Dashboard Kaart -->
+                        <div class="bg-gradient-to-br from-slate-50 to-blue-50/40 p-4 rounded-xl border border-blue-200/80 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-blue-500"></span> Kind B (Geen Eigen Inleg)
+                                </span>
+                                <span id="childB_ownershipPct" class="px-2 py-0.5 bg-blue-600 text-white rounded text-xs font-black">33,3% BE</span>
+                            </div>
+
+                            <div class="space-y-1.5 text-xs">
+                                <div class="flex justify-between py-1 border-b border-slate-200/60">
+                                    <span class="text-slate-600">Eigen Inleg vereist (Jaar 0):</span>
+                                    <span class="font-bold text-slate-800" id="childB_loanInitial">€ 0</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-slate-200/60">
+                                    <span class="text-slate-600">Uitkoop/Aflossing nodig na 5j:</span>
+                                    <span class="font-bold text-emerald-600">€ 0 (Geen lening nodig)</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-slate-200/60">
+                                    <span class="text-slate-600">Ouderlijke Schenking (1/2 van saldo):</span>
+                                    <span class="font-semibold text-slate-800" id="childB_giftShare">€ 146.933</span>
+                                </div>
+                                <div class="flex justify-between py-1">
+                                    <span class="text-slate-600">Gelijkheid t.o.v. Kind A:</span>
+                                    <span class="font-semibold text-blue-700">100% Gelijk van Ouders</span>
+                                </div>
+                            </div>
+
+                            <div class="pt-2 border-t border-blue-200/80 flex justify-between items-baseline text-xs">
+                                <span class="font-bold text-slate-700">Totale Waarde Blote Eigendom:</span>
+                                <span class="text-sm font-black text-blue-800" id="childB_totalValue">€ 146.933</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fiscale Toelichting over Schuldaflossing vs Schenking -->
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 leading-relaxed flex items-start gap-2.5">
+                        <i class="fa-solid fa-lightbulb text-amber-500 mt-0.5 text-sm shrink-0"></i>
+                        <div>
+                            <strong>Fiscaal Mechanisme na 5 jaar:</strong> De overdracht van Kind A's eigen gefinancierde quotiteit (<span id="descLoanA">€ 146.933 BE</span>) geschiedt via <em>inbetalinggeving / schuldvergelijking</em> ter aflossing van de familielening. De schenkbelasting van 3% wordt uitsluitend geheven over de werkelijke ouderlijke schenkingsporties, waardoor Kind A nooit dubbel belast wordt op diens eigen ingebrachte spaargeld.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visuele Vergelijking Barchart (Custom CSS/HTML) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+                    <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-chart-simple text-blue-600"></i> Kostenverdeling in Vergelijking
+                    </h4>
+                    
+                    <!-- Bar Optie A -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-slate-700">Optie A: Gesplitste aankoop</span>
+                            <span class="text-slate-900" id="chartTotalA">€ 94.958</span>
+                        </div>
+                        <div class="h-6 w-full bg-slate-100 rounded-lg flex overflow-hidden p-0.5 gap-0.5" id="barContainerA">
+                            <div id="barA_vat" class="bg-amber-500 rounded-l transition-all duration-500" title="BTW Constructie"></div>
+                            <div id="barA_reg" class="bg-blue-600 transition-all duration-500" title="Registratierechten Grond"></div>
+                            <div id="barA_gift" class="bg-purple-600 transition-all duration-500" title="Schenkbelasting Bankgift"></div>
+                            <div id="barA_notary" class="bg-slate-400 rounded-r transition-all duration-500" title="Notariskosten"></div>
+                        </div>
+                    </div>
+
+                    <!-- Bar Optie B -->
+                    <div class="space-y-1.5 pt-2">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-slate-700">Optie B: 100% Aankoop + Schenking (na 5j)</span>
+                            <span class="text-emerald-700" id="chartTotalB">€ 57.221</span>
+                        </div>
+                        <div class="h-6 w-full bg-slate-100 rounded-lg flex overflow-hidden p-0.5 gap-0.5" id="barContainerB">
+                            <div id="barB_vat" class="bg-emerald-500 rounded-l transition-all duration-500" title="BTW Constructie (6%)"></div>
+                            <div id="barB_reg" class="bg-blue-600 transition-all duration-500" title="Registratierechten Grond"></div>
+                            <div id="barB_gift" class="bg-purple-600 transition-all duration-500" title="Schenkbelasting Vastgoed"></div>
+                            <div id="barB_notary" class="bg-slate-400 rounded-r transition-all duration-500" title="Notariskosten (2 akten)"></div>
+                        </div>
+                    </div>
+
+                    <!-- Legende -->
+                    <div class="flex flex-wrap items-center gap-4 pt-3 text-xs text-slate-600 border-t border-slate-100">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> BTW (Optie A)
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> BTW (Optie B 6%)
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-blue-600 inline-block"></span> Registratierechten 12%
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-purple-600 inline-block"></span> Schenkbelasting
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-slate-400 inline-block"></span> Notaris & Dossier
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Belangrijke Notariële Aandachtspunten -->
+                <div class="bg-amber-50/60 border border-amber-200/80 rounded-2xl p-6 text-sm text-amber-950 space-y-3">
+                    <h5 class="font-bold flex items-center gap-2 text-amber-900">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Cruciale Fiscale & Juridische Aandachtspunten
+                    </h5>
+                    <ul class="space-y-2 text-xs leading-relaxed text-amber-900/90 list-disc pl-4">
+                        <li>
+                            <strong>Bewoningsvoorwaarde van 5 jaar bij Optie B:</strong> De ouders moeten de woning daadwerkelijk gedurende onafgebroken 5 jaar als hoofdverblijfplaats bewonen. Bij verkoop of eerdere overdracht vóór het einde van deze 5 jaar kan de fiscus een herziening van 15% btw (naheffing van 6% naar 21%) opeisen pro rata van de resterende termijn.
+                        </li>
+                        <li>
+                            <strong>Schenking met voorbehoud van vruchtgebruik:</strong> Bij het latere overlijden van de ouders dooft het vruchtgebruik automatisch uit. De kinderen worden op dat moment volle eigenaar <em>zonder enige erfbelasting</em> en <em>zonder bijkomende aktekosten</em>.
+                        </li>
+                        <li>
+                            <strong>Schenking over 2 ouders aan meerdere kinderen:</strong> Doordat de schenking gesplitst wordt per ouder en per kind, blijft de belastingbasis per kind per ouder zeer laag (vaak in de 3%-schijf tot € 150.000).
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Officiële VLABEL tabel voor waardering van vruchtgebruik (in rechte lijn / fiscaal)
+        function getVlabelUsufructRate(age) {
+            if (age < 20) return 0.80;
+            if (age <= 30) return 0.72;
+            if (age <= 40) return 0.64;
+            if (age <= 50) return 0.56;
+            if (age <= 55) return 0.48;
+            if (age <= 60) return 0.40;
+            if (age <= 65) return 0.32;
+            if (age <= 70) return 0.24;
+            if (age <= 75) return 0.16;
+            if (age <= 80) return 0.08;
+            return 0.04;
+        }
+
+        // Vlaamse progressieve schenkbelasting onroerend goed (rechte lijn) per schenker en begiftigde
+        function calcRealEstateGiftTax(amount) {
+            let tax = 0;
+            if (amount <= 150000) {
+                tax += amount * 0.03;
+            } else if (amount <= 250000) {
+                tax += 150000 * 0.03;
+                tax += (amount - 150000) * 0.09;
+            } else if (amount <= 450000) {
+                tax += 150000 * 0.03;
+                tax += 100000 * 0.09;
+                tax += (amount - 250000) * 0.18;
+            } else {
+                tax += 150000 * 0.03;
+                tax += 100000 * 0.09;
+                tax += 200000 * 0.18;
+                tax += (amount - 450000) * 0.27;
+            }
+            return tax;
+        }
+
+        // Formatteer naar Euro
+        function formatEuro(num) {
+            return new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Math.round(num));
+        }
+
+        // DOM Elementen
+        const age1Slider = document.getElementById('age1');
+        const age2Slider = document.getElementById('age2');
+        const age1Val = document.getElementById('age1Val');
+        const age2Val = document.getElementById('age2Val');
+        const totalPriceSlider = document.getElementById('totalPrice');
+        const totalPriceVal = document.getElementById('totalPriceVal');
+        const landPctSlider = document.getElementById('landPct');
+        const landPctVal = document.getElementById('landPctVal');
+        const growthRateSlider = document.getElementById('growthRate');
+        const growthRateVal = document.getElementById('growthRateVal');
+        const kidsButtons = document.querySelectorAll('.kids-btn');
+        const bankGiftTaxRadios = document.querySelectorAll('input[name="bankGiftTax"]');
+        const resetBtn = document.getElementById('resetBtn');
+
+        const shareChildASlider = document.getElementById('shareChildA');
+        const shareChildBSlider = document.getElementById('shareChildB');
+        const shareChildAVal = document.getElementById('shareChildAVal');
+        const shareChildBVal = document.getElementById('shareChildBVal');
+        const shareParentsVal = document.getElementById('shareParentsVal');
+        const presetModel1Btn = document.getElementById('presetModel1');
+        const presetEqualKidsBtn = document.getElementById('presetEqualKids');
+        const presetZeroKidsBtn = document.getElementById('presetZeroKids');
+
+        let numKids = 2;
+
+        kidsButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                kidsButtons.forEach(b => {
+                    b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+                    b.classList.add('border-slate-200', 'hover:bg-slate-50');
+                });
+                btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+                btn.classList.remove('border-slate-200', 'hover:bg-slate-50');
+                numKids = parseInt(btn.getAttribute('data-kids'));
+                document.getElementById('numKidsVal').textContent = `${numKids} ${numKids === 1 ? 'kind' : 'kinderen'}`;
+                updateCalculations();
+            });
+        });
+
+        presetModel1Btn.addEventListener('click', () => {
+            shareChildASlider.value = 33;
+            shareChildBSlider.value = 0;
+            updateCalculations();
+        });
+
+        presetEqualKidsBtn.addEventListener('click', () => {
+            shareChildASlider.value = 25;
+            shareChildBSlider.value = 25;
+            updateCalculations();
+        });
+
+        presetZeroKidsBtn.addEventListener('click', () => {
+            shareChildASlider.value = 0;
+            shareChildBSlider.value = 0;
+            updateCalculations();
+        });
+
+        function updateCalculations() {
+            const age1 = parseInt(age1Slider.value);
+            const age2 = parseInt(age2Slider.value);
+            const basePrice = parseFloat(totalPriceSlider.value);
+            const landPct = parseFloat(landPctSlider.value) / 100;
+            const growthRate = parseFloat(growthRateSlider.value) / 100;
+
+            let bankGiftTaxRate = 0.03;
+            bankGiftTaxRadios.forEach(r => {
+                if (r.checked) bankGiftTaxRate = parseFloat(r.value) / 100;
+            });
+
+            // Tekstlabels bijwerken
+            age1Val.textContent = `${age1} jaar`;
+            age2Val.textContent = `${age2} jaar`;
+            totalPriceVal.textContent = formatEuro(basePrice);
+            
+            const landPrice = basePrice * landPct;
+            const constructPrice = basePrice * (1 - landPct);
+            landPctVal.textContent = `${Math.round(landPct * 100)}% (${formatEuro(landPrice)})`;
+            growthRateVal.textContent = `+${Math.round(growthRate * 100)}%`;
+
+            // Leeftijdsbepaling volgens VLABEL: bij gehuwden/twee ouders geldt de jongste ouder (langstlevende)
+            const minAgeAtPurchase = Math.min(age1, age2);
+            const vgRateAtPurchase = getVlabelUsufructRate(minAgeAtPurchase);
+            const beRateAtPurchase = 1 - vgRateAtPurchase;
+
+            // Na 5 jaar:
+            const age1After5 = age1 + 5;
+            const age2After5 = age2 + 5;
+            const minAgeAfter5 = Math.min(age1After5, age2After5);
+            const vgRateAfter5 = getVlabelUsufructRate(minAgeAfter5);
+            const beRateAfter5 = 1 - vgRateAfter5;
+
+            // Update VLABEL Summary box
+            document.getElementById('vlabelSummary').innerHTML = `
+                <div>• Jongste ouder bij aankoop: <strong>${minAgeAtPurchase}j</strong> &rarr; VG: <strong>${Math.round(vgRateAtPurchase * 100)}%</strong> | BE: <strong>${Math.round(beRateAtPurchase * 100)}%</strong></div>
+                <div>• Jongste ouder na 5 jaar: <strong>${minAgeAfter5}j</strong> &rarr; VG: <strong>${Math.round(vgRateAfter5 * 100)}%</strong> | BE: <strong>${Math.round(beRateAfter5 * 100)}%</strong></div>
+            `;
+
+            // ==========================================
+            // CO-INVESTERING & KAPITAALVERDELING (JAAR 0)
+            // ==========================================
+            let pctChildA = parseFloat(shareChildASlider.value) / 100;
+            let pctChildB = parseFloat(shareChildBSlider.value) / 100;
+
+            // Zorg dat A + B niet meer dan 90% is
+            if (pctChildA + pctChildB > 0.90) {
+                pctChildB = 0.90 - pctChildA;
+                shareChildBSlider.value = Math.max(0, Math.round(pctChildB * 100));
+            }
+            const pctParents = Math.max(0.10, 1 - (pctChildA + pctChildB));
+
+            // Totale koopprijs bij aankoop 100% door ouders (Optie B basis):
+            const totalPurchaseCostOptB = basePrice + (landPrice * 0.12) + (constructPrice * 0.06);
+
+            const amountChildA = totalPurchaseCostOptB * pctChildA;
+            const amountChildB = totalPurchaseCostOptB * pctChildB;
+            const amountParents = totalPurchaseCostOptB * pctParents;
+
+            shareChildAVal.textContent = `${(pctChildA * 100).toFixed(1)}% (${formatEuro(amountChildA)})`;
+            shareChildBVal.textContent = `${(pctChildB * 100).toFixed(1)}% (${formatEuro(amountChildB)})`;
+            shareParentsVal.textContent = `${(pctParents * 100).toFixed(1)}% (${formatEuro(amountParents)})`;
+
+            // ==========================================
+            // BEREKENING OPTIE A (Gesplitste aankoop)
+            // ==========================================
+            const optA_reg = landPrice * 0.12;
+
+            // BTW constructie: Ouders betalen 6% op hun vruchtgebruikaandeel, kinderen 21% op blote eigendom
+            const optA_vatVG = (constructPrice * vgRateAtPurchase) * 0.06;
+            const optA_vatBE = (constructPrice * beRateAtPurchase) * 0.21;
+            const optA_vatTotal = optA_vatVG + optA_vatBE;
+
+            // Totale kost blote eigendom in Optie A
+            const totalBE_Cost = (landPrice * beRateAtPurchase * 1.12) + (constructPrice * beRateAtPurchase * 1.21);
+
+            // Eigen middelen die de kinderen zelf inbrengen
+            const totalChildrenSelfFunded = amountChildA + amountChildB;
+            // Alleen het deel dat de kinderen tekortkomen moet door de ouders geschonken worden via bankgift:
+            const bankGiftNeeded = Math.max(0, totalBE_Cost - totalChildrenSelfFunded);
+            const optA_giftTax = bankGiftNeeded * bankGiftTaxRate;
+            const optA_notary = 6000;
+
+            const optA_grandTotal = optA_reg + optA_vatTotal + optA_giftTax + optA_notary;
+
+            // ==========================================
+            // BEREKENING OPTIE B (100% Ouders + Lening & Schenking na 5j)
+            // ==========================================
+            const optB_reg = landPrice * 0.12;
+            const optB_vat = constructPrice * 0.06;
+            const optB_notary = 9500; // Aankoopakte + leningsovereenkomst + schenkingsakte
+
+            // Waarde woning na 5 jaar
+            const initialTotalValue = totalPurchaseCostOptB;
+            const propertyValueAfter5Years = initialTotalValue * (1 + growthRate);
+
+            // Waarde blote eigendom na 5 jaar
+            const totalBareOwnershipValueAfter5 = propertyValueAfter5Years * beRateAfter5;
+
+            // Geherwaardeerde lening / vordering van Kind A en Kind B conform de waardekoppeling:
+            const indexedChildA_Share = propertyValueAfter5Years * pctChildA;
+            const indexedChildB_Share = propertyValueAfter5Years * pctChildB;
+
+            // In blote eigendomswaarde na 5j vertegenwoordigt deze vordering:
+            const childA_BE_FromLoan = totalBareOwnershipValueAfter5 * pctChildA;
+            const childB_BE_FromLoan = totalBareOwnershipValueAfter5 * pctChildB;
+
+            // Resterende blote eigendom gefinancierd door de ouders:
+            const parentsBE_ToDonate = Math.max(0, totalBareOwnershipValueAfter5 - (childA_BE_FromLoan + childB_BE_FromLoan));
+
+            // De ouderlijke schenking wordt 50/50 (of over numKids) gelijk verdeeld:
+            const numPortions = 2 * numKids; // 2 ouders x kinderen
+            const donationPerPortion = parentsBE_ToDonate / numPortions;
+            const giftTaxPerPortion = calcRealEstateGiftTax(donationPerPortion);
+            const optB_giftTax = giftTaxPerPortion * numPortions;
+
+            const optB_grandTotal = optB_reg + optB_vat + optB_giftTax + optB_notary;
+
+            // ==========================================
+            // MODEL 1 DETAIL WIDGET BIJWERKEN
+            // ==========================================
+            const giftPerChildFromParents = parentsBE_ToDonate / numKids;
+
+            // Totale blote eigendom Kind A = eigen ingebracht deel + ouderlijke schenking
+            const childA_TotalBE = childA_BE_FromLoan + giftPerChildFromParents;
+            const childB_TotalBE = childB_BE_FromLoan + giftPerChildFromParents;
+
+            const pctA_Ownership = totalBareOwnershipValueAfter5 > 0 ? (childA_TotalBE / totalBareOwnershipValueAfter5) * 100 : 50;
+            const pctB_Ownership = totalBareOwnershipValueAfter5 > 0 ? (childB_TotalBE / totalBareOwnershipValueAfter5) * 100 : 50;
+
+            const profitChildA = indexedChildA_Share - amountChildA;
+            const profitPctChildA = amountChildA > 0 ? (profitChildA / amountChildA) * 100 : (growthRate * 100);
+
+            document.getElementById('childA_ownershipPct').textContent = `${pctA_Ownership.toFixed(1)}% BE`;
+            document.getElementById('childA_loanInitial').textContent = formatEuro(amountChildA);
+            document.getElementById('childA_loanIndexed').textContent = formatEuro(indexedChildA_Share);
+            document.getElementById('childA_profit').textContent = `+${formatEuro(profitChildA)} (+${profitPctChildA.toFixed(1)}%)`;
+            document.getElementById('childA_giftShare').textContent = formatEuro(giftPerChildFromParents);
+            document.getElementById('childA_totalValue').textContent = formatEuro(childA_TotalBE);
+
+            document.getElementById('childB_ownershipPct').textContent = `${pctB_Ownership.toFixed(1)}% BE`;
+            document.getElementById('childB_loanInitial').textContent = formatEuro(amountChildB);
+            document.getElementById('childB_giftShare').textContent = formatEuro(giftPerChildFromParents);
+            document.getElementById('childB_totalValue').textContent = formatEuro(childB_TotalBE);
+
+            document.getElementById('descLoanA').textContent = `${formatEuro(childA_BE_FromLoan)} BE`;
+
+            // ==========================================
+            // UI OVERZICHT BIJWERKEN
+            // ==========================================
+            document.getElementById('optA_reg').textContent = formatEuro(optA_reg);
+            document.getElementById('optA_vat').textContent = formatEuro(optA_vatTotal);
+            document.getElementById('optA_vatBreakdown').textContent = `6% op ${Math.round(vgRateAtPurchase * 100)}% VG / 21% op ${Math.round(beRateAtPurchase * 100)}% BE`;
+            document.getElementById('optA_giftTax').textContent = formatEuro(optA_giftTax);
+            document.getElementById('optA_giftTaxRate').textContent = bankGiftNeeded === 0 ? 'Geen bankgift nodig (eigen geld)' : (bankGiftTaxRate === 0 ? '0% (vrijgesteld)' : `3% over ${formatEuro(bankGiftNeeded)}`);
+            document.getElementById('optA_notary').textContent = formatEuro(optA_notary);
+            document.getElementById('optA_total').textContent = formatEuro(optA_grandTotal);
+
+            document.getElementById('optB_reg').textContent = formatEuro(optB_reg);
+            document.getElementById('optB_vat').textContent = formatEuro(optB_vat);
+            document.getElementById('optB_giftTax').textContent = formatEuro(optB_giftTax);
+            document.getElementById('optB_giftBreakdown').textContent = `Schenking ${formatEuro(parentsBE_ToDonate)} over ${numPortions} delen (${formatEuro(donationPerPortion)}/deel)`;
+            document.getElementById('optB_notary').textContent = formatEuro(optB_notary);
+            document.getElementById('optB_total').textContent = formatEuro(optB_grandTotal);
+
+            // Vergelijking & Winnaarskaart
+            const savings = optA_grandTotal - optB_grandTotal;
+            const winnerCard = document.getElementById('winnerCard');
+            const winnerTitle = document.getElementById('winnerTitle');
+            const winnerDesc = document.getElementById('winnerDesc');
+            const savingsAmount = document.getElementById('savingsAmount');
+
+            if (savings >= 0) {
+                winnerCard.className = "bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-2xl shadow-lg p-6 relative overflow-hidden";
+                winnerTitle.textContent = `Optie B bespaart ${formatEuro(savings)}`;
+                winnerDesc.innerHTML = `Dankzij de familielening met Kind A behouden de ouders <strong>100% 6% BTW</strong> op de constructie. Dit weegt ruimschoots op tegen de schenkbelasting van ${formatEuro(optB_giftTax)}.`;
+                savingsAmount.textContent = formatEuro(savings);
+            } else {
+                winnerCard.className = "bg-gradient-to-br from-blue-700 to-indigo-800 text-white rounded-2xl shadow-lg p-6 relative overflow-hidden";
+                winnerTitle.textContent = `Optie A bespaart ${formatEuro(Math.abs(savings))}`;
+                winnerDesc.innerHTML = `Onder deze extreme parameters is de directe gesplitste aankoop voordeliger.`;
+                savingsAmount.textContent = formatEuro(Math.abs(savings));
+            }
+
+            // Charts & Bars UI
+            document.getElementById('chartTotalA').textContent = formatEuro(optA_grandTotal);
+            document.getElementById('chartTotalB').textContent = formatEuro(optB_grandTotal);
+
+            const maxTotal = Math.max(optA_grandTotal, optB_grandTotal, 1);
+
+            document.getElementById('barA_vat').style.width = `${(optA_vatTotal / optA_grandTotal) * (optA_grandTotal / maxTotal) * 100}%`;
+            document.getElementById('barA_reg').style.width = `${(optA_reg / optA_grandTotal) * (optA_grandTotal / maxTotal) * 100}%`;
+            document.getElementById('barA_gift').style.width = `${(optA_giftTax / optA_grandTotal) * (optA_grandTotal / maxTotal) * 100}%`;
+            document.getElementById('barA_notary').style.width = `${(optA_notary / optA_grandTotal) * (optA_grandTotal / maxTotal) * 100}%`;
+
+            document.getElementById('barB_vat').style.width = `${(optB_vat / optB_grandTotal) * (optB_grandTotal / maxTotal) * 100}%`;
+            document.getElementById('barB_reg').style.width = `${(optB_reg / optB_grandTotal) * (optB_grandTotal / maxTotal) * 100}%`;
+            document.getElementById('barB_gift').style.width = `${(optB_giftTax / optB_grandTotal) * (optB_grandTotal / maxTotal) * 100}%`;
+            document.getElementById('barB_notary').style.width = `${(optB_notary / optB_grandTotal) * (optB_grandTotal / maxTotal) * 100}%`;
+        }
+
+        [age1Slider, age2Slider, totalPriceSlider, landPctSlider, growthRateSlider, shareChildASlider, shareChildBSlider].forEach(el => {
+            el.addEventListener('input', updateCalculations);
+        });
+
+        bankGiftTaxRadios.forEach(r => r.addEventListener('change', updateCalculations));
+
+        resetBtn.addEventListener('click', () => {
+            age1Slider.value = 65;
+            age2Slider.value = 63;
+            totalPriceSlider.value = 500000;
+            landPctSlider.value = 20;
+            growthRateSlider.value = 0;
+            shareChildASlider.value = 33;
+            shareChildBSlider.value = 0;
+            kidsButtons[1].click(); // 2 kinderen
+            bankGiftTaxRadios[0].checked = true;
+            updateCalculations();
+        });
+
+        // Eerste berekening bij het laden van de simulator
+        updateCalculations();
+    </script>
+</body>
+</html>
